@@ -1,0 +1,6 @@
+@nfe_processor_app_HostAddress = http://localhost:5257
+
+GET {{nfe_processor_app_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
