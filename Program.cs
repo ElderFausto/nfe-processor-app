@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore; 
-using NfeProcessor.Data; 
+using Microsoft.EntityFrameworkCore;
+using NfeProcessor.Data;
+using NfeProcessor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddDbContext<NfeDbContext>(options =>
     options.UseSqlite(connectionString));
 
 // Adiciona serviços padrão
+builder.Services.AddScoped<NfeService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
