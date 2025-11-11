@@ -61,7 +61,6 @@ namespace NfeProcessor.Services
                 // Se a nota já existe, lança um erro amigável que será enviado ao frontend.
                 throw new Exception($"A NF-e número {nfeData.Number} (Chave: {nfeData.AccessKey}) já foi processada.");
             }
-            // fim da adição
 
             // Este código só será executado se a NFe for nova
             await _context.Nfes.AddAsync(nfeData);
