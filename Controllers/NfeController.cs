@@ -36,7 +36,7 @@ namespace NfeProcessor.Controllers
             {
                 await using var stream = file.OpenReadStream();
                 var nfe = await _nfeService.ProcessNfe(stream);
-                return Ok(nfe); 
+                return Ok(nfe);
             }
             catch (Exception ex)
             {
@@ -71,7 +71,8 @@ namespace NfeProcessor.Controllers
                 var totalIcms = await _context.Nfes.SumAsync(n => n.IcmsValue);
                 var totalIpi = await _context.Nfes.SumAsync(n => n.IpiValue);
 
-                return Ok(new {
+                return Ok(new
+                {
                     totalNotes,
                     totalValue,
                     totalIcms,
@@ -101,11 +102,32 @@ namespace NfeProcessor.Controllers
                 await _context.SaveChangesAsync();
 
                 // Retorna 'No Content', que é o padrão HTTP 204 para um DELETE bem-sucedido
-                return NoContent(); 
+                return NoContent();
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erro interno ao excluir a nota: {ex.Message}");
+            }
+        }
+
+        [HttpGet("export")]
+        public IActionResult Export()
+        {
+            try
+            {
+                var fileBytes = _nfeService.ExportToExcel();
+
+                string fileName = $"NFe_Export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                // Define o tipo de conteúdo (MIME type) para um arquivo Excel
+                string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+                // Retorna o arquivo para download
+                return File(fileBytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno ao exportar o arquivo: {ex.Message}");
             }
         }
     }
