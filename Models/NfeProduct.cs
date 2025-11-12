@@ -8,8 +8,6 @@ namespace NfeProcessor.Models
         public int Quantity { get; set; } // Quantidade
         public decimal UnitValue { get; set; } // ValorUnitario
         public decimal TotalValue { get; set; } // ValorTotal
-
-        // Chave Estrangeira
         public string NfeAccessKey { get; set; } = string.Empty; // NfeChaveAcesso
         public Nfe Nfe { get; set; } = null!;
     }

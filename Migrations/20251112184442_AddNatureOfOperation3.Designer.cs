@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NfeProcessor.Data;
 
@@ -10,9 +11,11 @@ using NfeProcessor.Data;
 namespace nfe_processor_app.Migrations
 {
     [DbContext(typeof(NfeDbContext))]
-    partial class NfeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251112184442_AddNatureOfOperation3")]
+    partial class AddNatureOfOperation3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");

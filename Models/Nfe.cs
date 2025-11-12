@@ -10,6 +10,8 @@ namespace NfeProcessor.Models
         public int Number { get; set; } // Numero
         public DateTime IssueDate { get; set; } // DataEmissao
 
+        public string? NatureOfOperation { get; set; } // NaturezaOperacao
+
         public string IssuerName { get; set; } = string.Empty; // EmitenteNome
         public string IssuerCNPJ { get; set; } = string.Empty; // EmitenteCNPJ
 

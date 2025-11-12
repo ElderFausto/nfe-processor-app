@@ -3,7 +3,6 @@ using NfeProcessor.Data;
 using NfeProcessor.Models;
 using System.Globalization;
 using ClosedXML.Excel;
-using System.IO;
 using Microsoft.EntityFrameworkCore;
 
 namespace NfeProcessor.Services
@@ -17,6 +16,7 @@ namespace NfeProcessor.Services
             _context = context;
         }
 
+        // Método de processamento de NFe
         public async Task<Nfe> ProcessNfe(Stream xmlStream)
         {
             XDocument doc = await XDocument.LoadAsync(xmlStream, System.Xml.Linq.LoadOptions.None, CancellationToken.None);
@@ -46,6 +46,7 @@ namespace NfeProcessor.Services
                 AccessKey = accessKey,
                 Number = int.Parse(infNFeNode.Element(ns + "ide")?.Element(ns + "nNF")?.Value ?? "0"),
                 IssueDate = DateTime.Parse(infNFeNode.Element(ns + "ide")?.Element(ns + "dhEmi")?.Value ?? DateTime.Now.ToString()),
+                NatureOfOperation = infNFeNode.Element(ns + "ide")?.Element(ns + "natOp")?.Value ?? string.Empty,
                 IssuerName = infNFeNode.Element(ns + "emit")?.Element(ns + "xNome")?.Value ?? string.Empty,
                 IssuerCNPJ = infNFeNode.Element(ns + "emit")?.Element(ns + "CNPJ")?.Value ?? string.Empty,
                 RecipientName = infNFeNode.Element(ns + "dest")?.Element(ns + "xNome")?.Value ?? string.Empty,
@@ -60,7 +61,6 @@ namespace NfeProcessor.Services
                     Name = det.Element(ns + "prod")?.Element(ns + "xProd")?.Value ?? string.Empty,
                     Quantity = (int)decimal.Parse(det.Element(ns + "prod")?.Element(ns + "qCom")?.Value ?? "0", culture),
                     UnitValue = decimal.Parse(det.Element(ns + "prod")?.Element(ns + "vUnCom")?.Value ?? "0", culture),
-                    // ESTA É A LINHA QUE FOI CORRIGIDA (O 'D' FOI REMOVIDO)
                     TotalValue = decimal.Parse(det.Element(ns + "prod")?.Element(ns + "vProd")?.Value ?? "0", culture)
                 }).ToList()
             };
@@ -77,9 +77,11 @@ namespace NfeProcessor.Services
             return nfeData;
         }
 
+        // ExportToExcel
         public byte[] ExportToExcel()
         {
-            var nfes = _context.Nfes.Include(n => n.Products).ToList();
+            // AsNoTracking() para uma consulta mais rápida
+            var nfes = _context.Nfes.AsNoTracking().ToList(); 
             
             using (var workbook = new XLWorkbook())
             {
@@ -89,33 +91,36 @@ namespace NfeProcessor.Services
                 worksheet.Cell("A1").Value = "Número";
                 worksheet.Cell("B1").Value = "Chave de Acesso";
                 worksheet.Cell("C1").Value = "Data Emissão";
-                worksheet.Cell("D1").Value = "Emitente";
-                worksheet.Cell("E1").Value = "CNPJ Emitente";
-                worksheet.Cell("F1").Value = "Destinatário";
-                worksheet.Cell("G1").Value = "CNPJ Destinatário";
-                worksheet.Cell("H1").Value = "Valor Total (R$)";
-                worksheet.Cell("I1").Value = "ICMS (R$)";
-                worksheet.Cell("J1").Value = "IPI (R$)";
+                worksheet.Cell("D1").Value = "Natureza da Operação";
+                worksheet.Cell("E1").Value = "Emitente";
+                worksheet.Cell("F1").Value = "CNPJ Emitente";
+                worksheet.Cell("G1").Value = "Destinatário";
+                worksheet.Cell("H1").Value = "CNPJ Destinatário";
+                worksheet.Cell("I1").Value = "Valor Total (R$)";
+                worksheet.Cell("J1").Value = "ICMS (R$)";
+                worksheet.Cell("K1").Value = "IPI (R$)";
                 
-                var headerRange = worksheet.Range("A1:J1");
+                // Aplica estilo ao range correto
+                var headerRange = worksheet.Range("A1:K1");
                 headerRange.Style.Font.Bold = true;
                 headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#4A5568");
                 headerRange.Style.Font.FontColor = XLColor.White;
 
-                // Corpo
+                // Corpo da Tabela
                 int currentRow = 2;
                 foreach (var nfe in nfes)
                 {
                     worksheet.Cell(currentRow, 1).Value = nfe.Number;
                     worksheet.Cell(currentRow, 2).Value = nfe.AccessKey;
                     worksheet.Cell(currentRow, 3).Value = nfe.IssueDate;
-                    worksheet.Cell(currentRow, 4).Value = nfe.IssuerName;
-                    worksheet.Cell(currentRow, 5).Value = nfe.IssuerCNPJ;
-                    worksheet.Cell(currentRow, 6).Value = nfe.RecipientName;
-                    worksheet.Cell(currentRow, 7).Value = nfe.RecipientCNPJ;
-                    worksheet.Cell(currentRow, 8).Value = nfe.TotalValue;
-                    worksheet.Cell(currentRow, 9).Value = nfe.IcmsValue;
-                    worksheet.Cell(currentRow, 10).Value = nfe.IpiValue;
+                    worksheet.Cell(currentRow, 4).Value = nfe.NatureOfOperation; // <-- Coluna 4
+                    worksheet.Cell(currentRow, 5).Value = nfe.IssuerName;
+                    worksheet.Cell(currentRow, 6).Value = nfe.IssuerCNPJ;
+                    worksheet.Cell(currentRow, 7).Value = nfe.RecipientName;
+                    worksheet.Cell(currentRow, 8).Value = nfe.RecipientCNPJ;
+                    worksheet.Cell(currentRow, 9).Value = nfe.TotalValue;
+                    worksheet.Cell(currentRow, 10).Value = nfe.IcmsValue;
+                    worksheet.Cell(currentRow, 11).Value = nfe.IpiValue; // <-- Coluna 11
                     currentRow++;
                 }
 

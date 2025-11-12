@@ -11,7 +11,7 @@ namespace NfeProcessor.Controllers
     public class NfeController : ControllerBase
     {
         private readonly NfeService _nfeService;
-        private readonly NfeDbContext _context; // Já deve estar aqui
+        private readonly NfeDbContext _context;
 
         public NfeController(NfeService nfeService, NfeDbContext context)
         {
@@ -101,7 +101,7 @@ namespace NfeProcessor.Controllers
                 _context.Nfes.Remove(nfe);
                 await _context.SaveChangesAsync();
 
-                // Retorna 'No Content', que é o padrão HTTP 204 para um DELETE bem-sucedido
+                // Retorna 'No Content', que é o padrão HTTP 204 para um DELETE bem sucedido
                 return NoContent();
             }
             catch (Exception ex)
